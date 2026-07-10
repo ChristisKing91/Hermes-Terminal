@@ -1,0 +1,121 @@
+safety_policy:
+  enable_dangerous_confirmation: true
+  dangerous_confirmation_prefix: "CONFIRM"
+  
+  safe_commands:
+    - pwd
+    - ls
+    - cat
+    - head
+    - tail
+    - grep
+    - find
+    - df
+    - free
+    - uname
+    - "ip addr"
+    - "systemctl status"
+    - "journalctl"
+    - "apt-cache"
+    - "pvesm status"
+    - "qm config"
+    - "qm status"
+    - lvs
+    - vgs
+    - pvs
+    - lsblk
+    - whoami
+    - id
+    - date
+    - uptime
+    - ps
+    - top
+    - htop
+    - netstat
+    - ss
+    - dig
+    - nslookup
+    - ping
+    - traceroute
+
+  caution_commands:
+    - "apt update"
+    - "apt install"
+    - "apt remove"
+    - "apt upgrade"
+    - "systemctl start"
+    - "systemctl stop"
+    - "systemctl restart"
+    - "systemctl enable"
+    - "systemctl disable"
+    - "systemctl daemon-reload"
+    - chmod
+    - chown
+    - "firewall-cmd"
+    - "ufw"
+    - "useradd"
+    - "userdel"
+    - "usermod"
+    - "groupadd"
+    - "groupdel"
+    - "sshd"
+    - "qm set"
+    - "qm start"
+    - "qm stop"
+    - "qm reboot"
+    - mkdir
+    - touch
+    - cp
+    - mv
+    - sed
+    - awk
+
+  dangerous_commands:
+    - "rm -rf"
+    - "dd"
+    - mkfs
+    - wipefs
+    - fdisk
+    - parted
+    - lvremove
+    - vgremove
+    - pvremove
+    - "qm destroy"
+    - "qm delete"
+    - "pvesm remove"
+    - "userdel -r"
+    - shutdown
+    - reboot
+    - halt
+    - "iptables -P"
+    - "firewall-cmd -P"
+
+  blocked_patterns:
+    - "base64 -d"
+    - "eval"
+    - "exec"
+    - "source"
+    - "| sh"
+    - "| bash"
+    - "| python"
+    - "| perl"
+    - "; rm"
+    - "&& rm"
+    - "|| rm"
+    - "; mkfs"
+    - "; dd"
+    - ">/dev/sda"
+    - ">/dev/hda"
+
+  require_approval_for:
+    - caution
+    - danger
+
+  log_all_commands: true
+  redact_patterns:
+    - "password"
+    - "secret"
+    - "token"
+    - "api_key"
+    - "private_key"
+    - "ssh_key"
