@@ -3,178 +3,161 @@ Configuration management for Hermes Terminal
 """
 
 import os
+import logging
 from pathlib import Path
 from typing import Optional
-import yaml
-from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
-from .models import HostConfig, OperatingSystem, ConnectionType
+from pydantic_settings import BaseSettings
+from pydantic import Field
+import yaml
+
+from .models import HostConfig, ConnectionType, OperatingSystem
+
+logger = logging.getLogger(__name__)
 
 
-class HermesSettings(BaseSettings):
-    """Main settings for Hermes Terminal"""
-    
+class Settings(BaseSettings):
+    """Application settings from environment variables"""
+
     # AI Provider
-    ai_provider: str = "ollama"  # "ollama" or "openai"
-    
-    # Ollama
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen2.5-coder:7b"
-    
-    # OpenAI
-    openai_api_key: Optional[str] = None
-    openai_model: Optional[str] = None
-    
+    ai_provider: str = Field(default="ollama", description="AI provider: ollama or openai")
+
+    # Ollama Configuration
+    ollama_base_url: str = Field(
+        default="http://localhost:11434",
+        description="Ollama base URL",
+    )
+    ollama_model: str = Field(
+        default="neural-chat:latest",
+        description="Ollama model to use - neural-chat is optimized for dialog and has excellent context understanding",
+    )
+
+    # OpenAI Configuration
+    openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key")
+    openai_model: str = Field(default="gpt-4-turbo", description="OpenAI model to use")
+
     # Paths
-    config_dir: Path = Field(default_factory=lambda: Path.home() / ".config" / "hermes-terminal")
-    database_path: Path = Field(default_factory=lambda: Path.home() / ".config" / "hermes-terminal" / "hermes.db")
-    log_dir: Path = Field(default_factory=lambda: Path.home() / ".local" / "share" / "hermes-terminal" / "logs")
-    
+    config_dir: Path = Field(
+        default_factory=lambda: Path.home() / ".config" / "hermes-terminal",
+        description="Configuration directory",
+    )
+    database_path: Path = Field(
+        default_factory=lambda: Path.home() / ".config" / "hermes-terminal" / "hermes.db",
+        description="Database path",
+    )
+    log_dir: Path = Field(
+        default_factory=lambda: Path.home() / ".local" / "share" / "hermes-terminal" / "logs",
+        description="Log directory",
+    )
+    context_file: Path = Field(
+        default_factory=lambda: Path.home() / ".config" / "hermes-terminal" / "context.yaml",
+        description="Context/learning file path",
+    )
+    session_log: Path = Field(
+        default_factory=lambda: Path.home() / ".config" / "hermes-terminal" / "session_log.yaml",
+        description="Session log for continuity",
+    )
+
     # SSH
-    ssh_key_path: Path = Field(default_factory=lambda: Path.home() / ".ssh" / "hermes_key")
-    ssh_timeout: int = 30
-    
+    ssh_key_path: str = Field(
+        default="~/.ssh/hermes_key",
+        description="Default SSH key path",
+    )
+    ssh_timeout: int = Field(default=30, description="SSH timeout in seconds")
+
     # Security
-    require_dangerous_confirmation: bool = True
-    
+    require_dangerous_confirmation: bool = Field(
+        default=True,
+        description="Require explicit confirmation for dangerous commands",
+    )
+    dangerous_confirmation_prefix: str = Field(
+        default="CONFIRM",
+        description="Confirmation prefix for dangerous commands",
+    )
+
     # Audit
-    audit_enabled: bool = True
-    
-    # Logging
-    log_level: str = "INFO"
-    
+    audit_enabled: bool = Field(default=True, description="Enable audit logging")
+    audit_redact_enabled: bool = Field(default=True, description="Enable secret redaction in logs")
+
+    # Learning
+    enable_learning: bool = Field(
+        default=True,
+        description="Enable AI learning from session history",
+    )
+    learning_batch_size: int = Field(
+        default=100,
+        description="Number of past commands to include in context window",
+    )
+    context_update_interval: int = Field(
+        default=10,
+        description="Update context summary every N commands",
+    )
+
     class Config:
         env_file = ".env"
-        env_prefix = "HERMES_"
+        env_file_encoding = "utf-8"
         case_sensitive = False
+        env_prefix = "HERMES_"
 
 
-def load_settings() -> HermesSettings:
+def load_settings() -> Settings:
     """Load settings from environment"""
-    # Load .env file if it exists
+    # Load .env if it exists
     env_path = Path.cwd() / ".env"
     if env_path.exists():
         load_dotenv(env_path)
-    
-    return HermesSettings()
+
+    return Settings()
 
 
-def load_hosts_config(config_path: Optional[Path] = None) -> dict[str, HostConfig]:
-    """Load hosts configuration from YAML file"""
-    if config_path is None:
-        settings = load_settings()
-        config_path = settings.config_dir / "hosts.yaml"
-    
-    if not config_path.exists():
-        return _get_default_hosts()
-    
-    try:
-        with open(config_path, "r") as f:
-            data = yaml.safe_load(f)
-        
-        if not data or "hosts" not in data:
-            return _get_default_hosts()
-        
-        hosts = {}
-        for name, config in data.get("hosts", {}).items():
-            config["name"] = name
-            hosts[name] = HostConfig(**config)
-        
-        return hosts
-    except Exception as e:
-        print(f"Error loading hosts config: {e}")
-        return _get_default_hosts()
-
-
-def _get_default_hosts() -> dict[str, HostConfig]:
-    """Get default hosts configuration"""
-    return {
-        "gateway": HostConfig(
-            name="gateway",
-            connection=ConnectionType.LOCAL,
-            description="Gateway WSL control node (local)",
-        ),
-        "core": HostConfig(
-            name="core",
-            hostname="192.168.1.84",
-            user="root",
-            port=22,
-            description="Proxmox host",
-            operating_system=OperatingSystem.PROXMOX,
-        ),
-        "kali": HostConfig(
-            name="kali",
-            hostname="192.168.1.100",
-            user="roy",
-            port=22,
-            description="Kali VM 100",
-            operating_system=OperatingSystem.KALI,
-        ),
-    }
-
-
-def create_default_config():
-    """Create default configuration directory and files"""
+def create_default_config() -> None:
+    """Create default configuration directories and files"""
     settings = load_settings()
-    
+
     # Create directories
     settings.config_dir.mkdir(parents=True, exist_ok=True)
     settings.log_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create hosts.yaml if it doesn't exist
-    hosts_path = settings.config_dir / "hosts.yaml"
-    if not hosts_path.exists():
-        hosts_data = {
-            "hosts": {
-                "gateway": {
-                    "connection": "local",
-                    "description": "Gateway WSL control node (local)",
-                },
-                "core": {
-                    "hostname": "192.168.1.84",
-                    "user": "root",
-                    "port": 22,
-                    "description": "Proxmox host",
-                    "operating_system": "proxmox",
-                    "ssh_key": "~/.ssh/hermes_key",
-                    "timeout": 30,
-                },
-                "kali": {
-                    "hostname": "192.168.1.100",
-                    "user": "roy",
-                    "port": 22,
-                    "description": "Kali VM 100",
-                    "operating_system": "kali",
-                    "ssh_key": "~/.ssh/hermes_key",
-                    "timeout": 30,
-                },
-            }
+
+    logger.info(f"Configuration directory: {settings.config_dir}")
+    logger.info(f"Database path: {settings.database_path}")
+
+
+def load_hosts_config(config_path: Optional[Path] = None) -> dict[str, HostConfig]:
+    """Load hosts configuration from YAML"""
+    if config_path is None:
+        settings = load_settings()
+        config_path = settings.config_dir / "hosts.yaml"
+
+    if not config_path.exists():
+        logger.warning(f"Hosts config not found at {config_path}")
+        # Return default gateway host
+        return {
+            "gateway": HostConfig(
+                name="gateway",
+                connection=ConnectionType.LOCAL,
+                description="Local WSL gateway",
+            )
         }
-        with open(hosts_path, "w") as f:
-            yaml.dump(hosts_data, f, default_flow_style=False)
-    
-    # Create policy.yaml if it doesn't exist
-    policy_path = settings.config_dir / "policy.yaml"
-    if not policy_path.exists():
-        policy_data = {
-            "safety_policy": {
-                "enable_dangerous_confirmation": True,
-                "dangerous_confirmation_prefix": "CONFIRM",
-                "safe_commands": [
-                    "pwd", "ls", "cat", "head", "tail", "grep", "find",
-                    "df", "free", "uname", "ip addr", "systemctl status",
-                    "journalctl", "apt-cache", "pvesm status", "qm config",
-                    "qm status", "lvs", "vgs", "pvs", "lsblk",
-                ],
-                "caution_commands": [
-                    "apt update", "apt install", "apt remove", "systemctl start",
-                    "systemctl stop", "chmod", "chown", "useradd", "qm set",
-                ],
-                "dangerous_commands": [
-                    "rm -rf", "dd", "mkfs", "wipefs", "fdisk", "lvremove",
-                    "qm destroy", "shutdown", "reboot",
-                ],
-            }
-        }
-        with open(policy_path, "w") as f:
-            yaml.dump(policy_data, f, default_flow_style=False)
+
+    try:
+        with open(config_path) as f:
+            data = yaml.safe_load(f)
+
+        hosts = {}
+        for name, config in data.get("hosts", {}).items():
+            hosts[name] = HostConfig(
+                name=name,
+                connection=ConnectionType(config.get("connection", "ssh")),
+                hostname=config.get("hostname"),
+                user=config.get("user"),
+                port=config.get("port", 22),
+                operating_system=OperatingSystem(config.get("operating_system", "linux")),
+                ssh_key=config.get("ssh_key"),
+                timeout=config.get("timeout", 30),
+                description=config.get("description", ""),
+            )
+
+        return hosts
+    except Exception as e:
+        logger.error(f"Failed to load hosts config: {e}")
+        return {}
