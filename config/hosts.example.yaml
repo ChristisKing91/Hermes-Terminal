@@ -1,0 +1,31 @@
+hosts:
+  gateway:
+    connection: local
+    description: "Gateway WSL control node (local)"
+
+  core:
+    hostname: 192.168.1.84
+    user: root
+    port: 22
+    description: "Proxmox host"
+    operating_system: proxmox
+    ssh_key: ~/.ssh/hermes_key
+    timeout: 30
+
+  kali:
+    hostname: "192.168.1.100"  # Will be prompted or configured later
+    user: roy
+    port: 22
+    description: "Kali VM 100"
+    operating_system: kali
+    ssh_key: ~/.ssh/hermes_key
+    timeout: 30
+
+  thinkcentre:
+    hostname: "192.168.1.200"  # Will be configured
+    user: admin
+    port: 22
+    description: "Lenovo ThinkCentre"
+    operating_system: linux
+    ssh_key: ~/.ssh/hermes_key
+    timeout: 30
