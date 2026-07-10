@@ -1,111 +1,84 @@
 """
-Data models for Hermes Terminal using Pydantic
+Data models for Hermes Terminal
 """
 
 from enum import Enum
-from typing import Optional, Any
-from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
-
-
-class OperatingSystem(str, Enum):
-    """Supported operating systems"""
-    LINUX = "linux"
-    KALI = "kali"
-    PROXMOX = "proxmox"
-    WINDOWS = "windows"
-
-
-class ConnectionType(str, Enum):
-    """Connection types"""
-    LOCAL = "local"
-    SSH = "ssh"
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
 class CommandRisk(str, Enum):
-    """Command risk classification"""
+    """Command risk level classification"""
     SAFE = "safe"
     CAUTION = "caution"
     DANGER = "danger"
     BLOCKED = "blocked"
 
 
-class HostConfig(BaseModel):
-    """Configuration for a managed host"""
-    model_config = ConfigDict(extra="allow")
-    
-    name: str
-    description: str
-    connection: ConnectionType = ConnectionType.SSH
-    hostname: Optional[str] = None
-    user: Optional[str] = None
-    port: int = 22
-    ssh_key: Optional[str] = None
-    operating_system: OperatingSystem = OperatingSystem.LINUX
-    timeout: int = 30
-    enabled: bool = True
+class ConnectionType(str, Enum):
+    """Host connection type"""
+    LOCAL = "local"
+    SSH = "ssh"
+    REMOTE = "remote"
+
+
+class OperatingSystem(str, Enum):
+    """Operating system type"""
+    LINUX = "linux"
+    KALI = "kali"
+    PROXMOX = "proxmox"
+    WINDOWS = "windows"
+    MACOS = "macos"
+    FREEBSD = "freebsd"
 
 
 class Command(BaseModel):
-    """A command to be executed"""
+    """Represents a command execution"""
     command: str
     risk_level: CommandRisk
+    host: str
     explanation: str = ""
-    host: str
-    requires_approval: bool = False
-    requires_confirmation: bool = False
-    confirmation_text: Optional[str] = None
-
-
-class CommandApproval(BaseModel):
-    """Approval record for a command"""
-    command_id: str
-    user: str
-    approved: bool
-    timestamp: datetime = Field(default_factory=datetime.now)
-    reason: Optional[str] = None
-
-
-class CommandExecution(BaseModel):
-    """Record of a command execution"""
-    execution_id: str
-    command: str
-    host: str
-    user: str
-    start_time: datetime = Field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
+    timestamp: Optional[str] = None
     exit_code: Optional[int] = None
-    stdout: str = ""
-    stderr: str = ""
-    duration_seconds: float = 0.0
+    output: Optional[str] = None
 
 
-class Session(BaseModel):
-    """A session record"""
+class HostConfig(BaseModel):
+    """Host configuration"""
+    name: str
+    connection: ConnectionType
+    hostname: Optional[str] = None
+    user: Optional[str] = None
+    port: int = 22
+    operating_system: OperatingSystem = OperatingSystem.LINUX
+    ssh_key: Optional[str] = None
+    timeout: int = 30
+    description: str = ""
+
+
+class SessionRecord(BaseModel):
+    """Session record for audit trail"""
     session_id: str
     user: str
     host: str
-    mode: str  # "manual", "ai_assistant", "command_builder"
-    start_time: datetime = Field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
-    working_directory: str = "~"
-    commands_count: int = 0
+    mode: str  # manual, ai_assistant, command_builder
+    start_time: str
+    end_time: Optional[str] = None
+    commands_executed: int = 0
+    commands_approved: int = 0
+    commands_rejected: int = 0
 
 
-class AIRequest(BaseModel):
-    """AI assistant request"""
-    request_id: str
-    user_request: str
+class ExecutionRecord(BaseModel):
+    """Execution record"""
+    execution_id: str
+    session_id: str
+    command: str
     host: str
-    timestamp: datetime = Field(default_factory=datetime.now)
-    context: Optional[dict[str, Any]] = None
-
-
-class AIResponse(BaseModel):
-    """AI assistant response"""
-    request_id: str
-    explanation: str
-    commands: list[Command]
-    risk_assessment: str
-    timestamp: datetime = Field(default_factory=datetime.now)
-    raw_response: Optional[str] = None
+    user: str
+    start_time: str
+    end_time: Optional[str] = None
+    exit_code: Optional[int] = None
+    duration_seconds: Optional[float] = None
+    stdout: Optional[str] = None
+    stderr: Optional[str] = None
