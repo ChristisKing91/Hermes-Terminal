@@ -198,10 +198,11 @@ def ai_assistant(app_instance: HermesTerminal):
             with console.status("[bold cyan]Analyzing..."):
                 plan = app_instance.generate_command_plan(request)
 
-            if plan:
+            if plan and plan.get("error"):
+                console.print(f"[yellow]{plan['error']}[/yellow]")
+            elif plan and plan.get("ai_response", "").strip():
                 console.print("\n[bold]AI Response:[/bold]")
                 console.print(plan["ai_response"])
-                console.print("\n[yellow]Note: Review the proposed commands carefully before execution.[/yellow]")
             else:
                 console.print("[red]Failed to generate plan[/red]")
         except KeyboardInterrupt:
@@ -234,7 +235,9 @@ def ai_command_builder(app_instance: HermesTerminal):
             with console.status("[bold cyan]Generating commands..."):
                 plan = app_instance.generate_command_plan(request)
 
-            if plan:
+            if plan and plan.get("error"):
+                console.print(f"[yellow]{plan['error']}[/yellow]")
+            elif plan and plan.get("ai_response", "").strip():
                 console.print("\n[bold]Proposed Commands:[/bold]")
                 console.print(plan["ai_response"])
                 console.print(

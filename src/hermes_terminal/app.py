@@ -13,7 +13,7 @@ from .safety.classifier import SafetyClassifier, ApprovalGate
 from .audit.database import AuditDatabase
 from .hosts.registry import HostRegistry
 from .ai.base import AIProvider
-from .ai.ollama import OllamaProvider
+from .ai.ollama import AITimeoutError, OllamaProvider
 from .ai.openai_compatible import OpenAICompatibleProvider
 from .learning.context import ContextManager
 from .ai.prompts import SYSTEM_PROMPT
@@ -91,6 +91,7 @@ class HermesTerminal:
             provider = OllamaProvider(
                 base_url=self.settings.ollama_base_url,
                 model=self.settings.ollama_model,
+                timeout=self.settings.ai_timeout,
             )
             if provider.is_available():
                 logger.info(
@@ -267,6 +268,9 @@ class HermesTerminal:
                 system_prompt=enhanced_prompt,
             )
 
+            if not response.strip():
+                return None
+
             return {
                 "request_id": request_id,
                 "user_request": user_request,
@@ -274,6 +278,9 @@ class HermesTerminal:
                 "host": self.current_host,
                 "context_used": len(context.get("recent_commands", [])),
             }
+        except AITimeoutError as e:
+            logger.warning("AI generation timed out")
+            return {"error": str(e), "ai_response": "", "commands_generated": False}
         except Exception as e:
             logger.error(f"AI generation failed: {e}")
             return None

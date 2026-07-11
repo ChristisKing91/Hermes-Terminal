@@ -30,6 +30,10 @@ class Settings(BaseSettings):
         default="neural-chat:latest",
         description="Ollama model to use - neural-chat is optimized for dialog and has excellent context understanding",
     )
+    ai_timeout: float = Field(
+        default=300.0,
+        description="AI generation timeout in seconds",
+    )
 
     # OpenAI Configuration
     openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key")

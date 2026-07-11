@@ -9,14 +9,20 @@ from .base import AIProvider
 
 logger = logging.getLogger(__name__)
 
+AI_TIMEOUT_MESSAGE = "The local model took too long to respond. Try again or use a smaller prompt."
+
+
+class AITimeoutError(RuntimeError):
+    """Raised when local model generation exceeds the configured timeout."""
+
 
 class OllamaProvider(AIProvider):
     """Ollama local AI provider"""
 
-    def __init__(self, base_url: str, model: str):
+    def __init__(self, base_url: str, model: str, timeout: float = 300.0):
         self.base_url = base_url.rstrip("/")
         self.model = model
-        self.timeout = 120.0
+        self.timeout = timeout
 
     def is_available(self) -> bool:
         """Check if Ollama is running and model is available"""
@@ -40,7 +46,8 @@ class OllamaProvider(AIProvider):
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
 
-            with httpx.Client(timeout=self.timeout) as client:
+            timeout = httpx.Timeout(self.timeout, connect=10.0)
+            with httpx.Client(timeout=timeout) as client:
                 response = client.post(
                     f"{self.base_url}/api/chat",
                     json={
@@ -52,9 +59,12 @@ class OllamaProvider(AIProvider):
                 response.raise_for_status()
                 data = response.json()
                 return data.get("message", {}).get("content", "")
-        except Exception as e:
+        except httpx.TimeoutException as e:
+            logger.warning("Ollama generation timed out: %s", e)
+            raise AITimeoutError(AI_TIMEOUT_MESSAGE) from e
+        except (httpx.HTTPError, ValueError, KeyError) as e:
             logger.error(f"Ollama generation failed: {e}")
-            return f"Error: {str(e)}"
+            return ""
 
     def list_models(self) -> list[str]:
         """List available Ollama models"""
