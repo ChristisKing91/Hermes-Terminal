@@ -2,9 +2,8 @@
 Tests for safety classifier and approval gate
 """
 
-import pytest
 from hermes_terminal.safety.classifier import SafetyClassifier, ApprovalGate
-from hermes_terminal.models import CommandRisk, Command, ConnectionType
+from hermes_terminal.models import CommandRisk, Command
 
 
 class TestSafetyClassifier:
@@ -44,6 +43,8 @@ class TestSafetyClassifier:
             "rm -rf /var",
             "dd if=/dev/zero of=/dev/sda",
             "mkfs.ext4 /dev/sda1",
+            "sudo rm -rf /var",
+            "ls && reboot",
         ]
 
         for cmd in danger_commands:

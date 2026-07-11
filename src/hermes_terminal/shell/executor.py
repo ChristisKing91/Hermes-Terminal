@@ -4,11 +4,11 @@ Command execution - local and remote via SSH
 
 import subprocess
 import logging
-import time
+import shlex
 from pathlib import Path
 from typing import Optional, Tuple
 import paramiko
-from paramiko.ssh_exception import SSHException, AuthException
+from paramiko.ssh_exception import SSHException, AuthenticationException
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,9 @@ class RemoteExecutor:
         """Establish SSH connection"""
         try:
             self.client = paramiko.SSHClient()
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            # Never trust an unknown remote host key implicitly.
+            self.client.load_system_host_keys()
+            self.client.set_missing_host_key_policy(paramiko.RejectPolicy())
 
             if self.ssh_key_path:
                 key_path = Path(self.ssh_key_path).expanduser()
@@ -97,23 +99,21 @@ class RemoteExecutor:
                     )
                 else:
                     logger.warning(f"SSH key not found: {key_path}")
-                    self.client.connect(
-                        self.hostname,
-                        port=self.port,
-                        username=self.username,
-                        timeout=self.timeout,
-                    )
+                    logger.error("Configured SSH key does not exist; refusing password fallback")
+                    return False
             else:
                 self.client.connect(
                     self.hostname,
                     port=self.port,
                     username=self.username,
                     timeout=self.timeout,
+                    look_for_keys=True,
+                    allow_agent=True,
                 )
 
             logger.info(f"Connected to {self.hostname} as {self.username}")
             return True
-        except AuthException as e:
+        except AuthenticationException as e:
             logger.error(f"Authentication failed: {e}")
             return False
         except SSHException as e:
@@ -148,7 +148,7 @@ class RemoteExecutor:
                 if len(parts) == 2:
                     new_cwd = parts[1]
                     # Validate the directory exists on remote
-                    _, out, _ = self._execute_raw(f"test -d {new_cwd} && echo ok")
+                    _, out, _ = self._execute_raw(f"test -d {shlex.quote(new_cwd)} && echo ok")
                     if "ok" in out:
                         self.cwd = new_cwd
                         return 0, f"Changed directory to {new_cwd}", ""
@@ -156,7 +156,7 @@ class RemoteExecutor:
                         return 1, "", f"Directory does not exist: {new_cwd}"
             
             # Execute with cwd context if needed
-            full_command = f"cd {self.cwd} && {command}"
+            full_command = f"cd {shlex.quote(self.cwd)} && {command}"
             exit_code, stdout, stderr = self._execute_raw(full_command, timeout)
             return exit_code, stdout, stderr
         except Exception as e:
@@ -183,7 +183,7 @@ class RemoteExecutor:
     def change_directory(self, new_cwd: str) -> bool:
         """Change working directory"""
         try:
-            _, out, _ = self._execute_raw(f"test -d {new_cwd} && echo ok")
+            _, out, _ = self._execute_raw(f"test -d {shlex.quote(new_cwd)} && echo ok")
             if "ok" in out:
                 self.cwd = new_cwd
                 return True

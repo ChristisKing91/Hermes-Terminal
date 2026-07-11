@@ -11,7 +11,6 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 from rich.prompt import Prompt, Confirm
 
 from .app import HermesTerminal
@@ -134,7 +133,27 @@ def manual_shell(app_instance: HermesTerminal):
                 console.print("[yellow]Switching to AI Command Builder mode[/yellow]")
                 break
 
-            # Execute command
+            risk, explanation = app_instance.classify_command(command)
+            if risk == CommandRisk.BLOCKED:
+                console.print(f"[red]Blocked: {explanation}[/red]")
+                continue
+            approved = risk == CommandRisk.SAFE
+            if risk == CommandRisk.CAUTION:
+                approved = Confirm.ask(
+                    f"[yellow]CAUTION[/yellow] on {app_instance.current_host}: {command}\nApprove?",
+                    default=False,
+                )
+            elif risk == CommandRisk.DANGER:
+                expected = f"CONFIRM {app_instance.current_host} execute"
+                entered = Prompt.ask(
+                    f"[red]DANGER[/red] Type exactly: [bold]{expected}[/bold]"
+                )
+                approved = entered == expected
+            if not approved:
+                console.print("[yellow]Command not executed.[/yellow]")
+                continue
+
+            # Execute only after the safety gate above.
             with console.status("[bold green]Executing..."):
                 exit_code, stdout, stderr = app_instance.execute_command(
                     command, require_approval=False
@@ -335,6 +354,12 @@ def ai_mode():
         app_instance.end_session()
 
 
+@app.command("ai")
+def ai():
+    """Start in AI assistant mode."""
+    ai_mode()
+
+
 @app.command()
 def build():
     """Start in AI command builder mode"""
@@ -370,6 +395,59 @@ def hosts_list():
     console.print(table)
 
 
+@app.command("hosts")
+def hosts():
+    """List configured hosts without connecting to them."""
+    hosts_list()
+
+
+@app.command("setup")
+def setup():
+    """Create local configuration using safe example defaults."""
+    settings = load_settings()
+    create_default_config()
+    hosts_path = settings.config_dir / "hosts.yaml"
+    policy_path = settings.config_dir / "policy.yaml"
+    project_root = Path(__file__).resolve().parents[2]
+    defaults = {
+        hosts_path: """hosts:
+  gateway:
+    connection: local
+    description: Gateway WSL control node
+  core:
+    connection: ssh
+    hostname: 192.168.1.84
+    user: root
+    operating_system: proxmox
+    ssh_key: ~/.ssh/hermes_key
+  kali:
+    connection: ssh
+    hostname: hermes-kali
+    user: roy
+    operating_system: kali
+    ssh_key: ~/.ssh/hermes_key
+""",
+        policy_path: """safety_policy:
+  enable_dangerous_confirmation: true
+  dangerous_confirmation_prefix: CONFIRM
+  require_approval_for: [caution, danger]
+  blocked_patterns: [eval, exec, base64 -d, '| sh', '| bash']
+  log_all_commands: true
+""",
+    }
+    for destination, example in (
+        (hosts_path, project_root / "config" / "hosts.example.yaml"),
+        (policy_path, project_root / "config" / "policy.example.yaml"),
+    ):
+        if destination.exists():
+            console.print(f"[dim]Kept existing {destination}[/dim]")
+        else:
+            content = example.read_text(encoding="utf-8") if example.exists() else defaults[destination]
+            destination.write_text(content, encoding="utf-8")
+            console.print(f"[green]Created {destination}[/green]")
+    console.print("Setup complete. Remote connections occur only when you explicitly select a remote host.")
+
+
 @app.command()
 def status():
     """Show host status"""
@@ -382,7 +460,7 @@ def history(host: Optional[str] = None, limit: int = 50):
     """Show command history"""
     app_instance = get_app()
     cmd_history = app_instance.get_command_history(host, limit)
-    console.print(f"[bold]Command History[/bold]")
+    console.print("[bold]Command History[/bold]")
 
     if cmd_history:
         table = Table()

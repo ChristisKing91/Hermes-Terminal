@@ -6,7 +6,6 @@ import sqlite3
 import json
 import logging
 from pathlib import Path
-from datetime import datetime
 from typing import Optional, Any
 from contextlib import contextmanager
 
@@ -296,7 +295,7 @@ class AuditDatabase:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT * FROM executions WHERE host = ?
-                ORDER BY start_time DESC LIMIT ?
+                ORDER BY start_time DESC, rowid DESC LIMIT ?
             """, (host, limit))
             return [dict(row) for row in cursor.fetchall()]
     

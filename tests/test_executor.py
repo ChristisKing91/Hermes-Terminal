@@ -2,7 +2,6 @@
 Tests for shell execution (local and SSH)
 """
 
-import pytest
 from hermes_terminal.shell.executor import LocalExecutor
 
 

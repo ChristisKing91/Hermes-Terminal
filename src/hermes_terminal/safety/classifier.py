@@ -3,9 +3,7 @@ Command safety classification and approval system
 """
 
 import re
-from typing import Optional
-from enum import Enum
-from .models import CommandRisk, Command
+from ..models import CommandRisk, Command
 
 
 class SafetyClassifier:
@@ -140,6 +138,26 @@ class SafetyClassifier:
         """
         # Clean up the command
         cmd = command.strip()
+
+        for pattern in SafetyClassifier.BLOCKED_PATTERNS:
+            if re.search(pattern, cmd, re.IGNORECASE):
+                return CommandRisk.BLOCKED, f"Command contains blocked pattern: {pattern}"
+
+        # Classify each shell-chain segment independently so a harmless first
+        # command cannot hide a later mutation (for example, ``ls && reboot``).
+        if re.search(r"(?:&&|\|\||[;|])", cmd):
+            segments = [part.strip() for part in re.split(r"&&|\|\||[;|]", cmd) if part.strip()]
+            results = [SafetyClassifier.classify(part) for part in segments]
+            priority = {
+                CommandRisk.SAFE: 0,
+                CommandRisk.CAUTION: 1,
+                CommandRisk.DANGER: 2,
+                CommandRisk.BLOCKED: 3,
+            }
+            return max(results, key=lambda item: priority[item[0]])
+
+        # sudo changes identity, not the underlying command risk.
+        cmd = re.sub(r"^sudo(?:\s+-\S+)*\s+", "", cmd, flags=re.IGNORECASE)
         
         # Check for blocked patterns first
         for pattern in SafetyClassifier.BLOCKED_PATTERNS:
@@ -150,16 +168,6 @@ class SafetyClassifier:
         for pattern in SafetyClassifier.DANGEROUS_PATTERNS:
             if re.match(pattern, cmd, re.IGNORECASE):
                 return CommandRisk.DANGER, f"Dangerous command: {pattern}"
-        
-        # Check for piped rm, mkfs, dd
-        if "|" in cmd or ";" in cmd or "&&" in cmd or "||" in cmd:
-            parts = re.split(r"[|;&]", cmd)
-            for part in parts:
-                part = part.strip()
-                if re.match(r"^rm\s+(-rf|-fr|--recursive)", part, re.IGNORECASE):
-                    return CommandRisk.DANGER, "Command chain contains destructive operation"
-                if re.match(r"^(dd|mkfs|wipefs)", part, re.IGNORECASE):
-                    return CommandRisk.DANGER, "Command chain contains destructive operation"
         
         # Check for caution commands
         for pattern in SafetyClassifier.CAUTION_PATTERNS:
@@ -211,11 +219,6 @@ class ApprovalGate:
     
     def get_approval_prompt(self, command: Command, target_host: str) -> str:
         """Generate an approval prompt for the user"""
-        risk_color = {
-            CommandRisk.CAUTION: "yellow",
-            CommandRisk.DANGER: "red",
-        }
-        
         prompt = f"""
 [{command.risk_level.value.upper()}] Approval Required
 

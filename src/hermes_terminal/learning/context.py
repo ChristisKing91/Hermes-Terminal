@@ -3,7 +3,6 @@ AI context and learning system for continuous improvement
 """
 
 import logging
-import json
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Any

@@ -5,16 +5,13 @@ Enhanced Hermes Terminal with AI learning and context management
 import uuid
 import logging
 import time
-from datetime import datetime
 from typing import Optional
-from pathlib import Path
 
-from .config import load_settings, create_default_config, load_hosts_config
-from .models import CommandRisk, Command
+from .config import load_settings, create_default_config
+from .models import CommandRisk
 from .safety.classifier import SafetyClassifier, ApprovalGate
 from .audit.database import AuditDatabase
 from .hosts.registry import HostRegistry
-from .shell.executor import LocalExecutor, RemoteExecutor
 from .ai.base import AIProvider
 from .ai.ollama import OllamaProvider
 from .ai.openai_compatible import OpenAICompatibleProvider
@@ -231,6 +228,11 @@ class HermesTerminal:
                 context=None,
             )
             return 1, "", str(e)
+
+    @staticmethod
+    def classify_command(command: str) -> tuple[CommandRisk, str]:
+        """Expose classification to interactive clients before execution."""
+        return SafetyClassifier.classify(command)
 
     def generate_command_plan(
         self, user_request: str

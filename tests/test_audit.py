@@ -2,8 +2,6 @@
 Tests for audit database
 """
 
-import pytest
-from pathlib import Path
 from hermes_terminal.audit.database import AuditDatabase
 
 
@@ -12,7 +10,7 @@ class TestAuditDatabase:
 
     def test_database_initialization(self, temp_db_path):
         """Test database initialization creates tables"""
-        db = AuditDatabase(temp_db_path)
+        AuditDatabase(temp_db_path)
         assert temp_db_path.exists()
 
     def test_log_session(self, temp_db_path):
