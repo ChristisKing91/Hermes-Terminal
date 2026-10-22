@@ -36,6 +36,7 @@ dev = [
 
 [project.scripts]
 hermes = "hermes_terminal.cli:cli_main"
+hermes-workbench = "hermes_terminal.workbench:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
