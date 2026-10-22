@@ -30,6 +30,10 @@ free-text evidence cannot substitute for them. Prefer a read-only view of the
 existing queue over two writable task authorities, and test interruption and stale
 revision rejection before enabling a bridge. No automatic apply bridge is enabled.
 
+The [read-only coordinator contract](COORDINATOR_READ_ONLY_CONTRACT.md) records a
+live GET schema observation, exact field mapping and a minimal view proposal.
+It adds no runtime adapter and keeps the existing task queue authoritative.
+
 Before native adoption, reconcile source authority and adapt this ledger to the
 existing Core's owner/project scope, approvals and storage policy. Review the diff
 and prove installed behavior separately. Do not copy another writable brain onto
