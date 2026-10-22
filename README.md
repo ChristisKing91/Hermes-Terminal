@@ -27,6 +27,16 @@ A sophisticated remote terminal control system with integrated AI assistance for
 
 ## Quick Start
 
+### Local agent workbench
+
+The optional [agent workbench](docs/AGENT_WORKBENCH.md) records scoped tasks,
+claims, checkpoints, handoffs and evidence in a local SQLite ledger. It uses no
+model or command execution and requires no third-party dependencies when invoked
+as `python -m hermes_terminal.workbench` with `src` on `PYTHONPATH`. The
+`hermes-workbench` entry point is also available after package installation.
+This development component has not been promoted into the installed native LXRION
+Core. See the guide for lifecycle, recovery, privacy and verification boundaries.
+
 ### Prerequisites
 - Python 3.11+
 - SSH access to target machines (optional for local gateway)
