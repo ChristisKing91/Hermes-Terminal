@@ -1,5 +1,5 @@
 """
-Configuration management for Hermes Terminal
+Configuration management for LXRION Terminal
 """
 
 import logging
