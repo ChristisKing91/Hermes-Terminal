@@ -1,5 +1,5 @@
 """
-CLI interface for Hermes Terminal using Typer and Rich
+CLI interface for LXRION Terminal using Typer and Rich
 """
 
 import sys
@@ -19,7 +19,7 @@ from .models import CommandRisk
 
 # Initialize CLI
 app = typer.Typer(
-    help="Hermes Terminal - Remote system control with AI assistance",
+    help="LXRION Terminal - Remote system control with AI assistance",
     no_args_is_help=True,
 )
 console = Console()
@@ -44,13 +44,13 @@ def get_app() -> HermesTerminal:
 
 @app.command()
 def main():
-    """Interactive menu for Hermes Terminal"""
+    """Interactive menu for LXRION Terminal"""
     app_instance = get_app()
     app_instance.start_session()
 
     console.print(
         Panel(
-            "[bold cyan]Hermes Command Center[/bold cyan]",
+            "[bold cyan]LXRION Terminal[/bold cyan]",
             expand=False,
             style="cyan",
         )
