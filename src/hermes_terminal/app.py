@@ -1,5 +1,5 @@
 """
-Enhanced Hermes Terminal with AI learning and context management
+Enhanced LXRION Terminal with AI learning and context management
 """
 
 import uuid
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class HermesTerminal:
-    """Enhanced Hermes Terminal with AI learning and memory"""
+    """Enhanced LXRION Terminal with AI learning and memory"""
 
     def __init__(self):
         # Initialize configuration
@@ -49,7 +49,7 @@ class HermesTerminal:
         self.session_active = False
         self.command_count = 0
 
-        logger.info("Hermes Terminal initialized with learning system")
+        logger.info("LXRION Terminal initialized with learning system")
         self._review_context_on_startup()
 
     def _review_context_on_startup(self) -> None:
