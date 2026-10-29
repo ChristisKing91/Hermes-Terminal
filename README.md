@@ -1,6 +1,10 @@
-# Hermes Terminal 🧙‍♂️
+# LXRION Terminal
 
-A sophisticated remote terminal control system with integrated AI assistance for managing multiple machines via SSH. Hermes combines manual shell access, AI-powered command suggestions, and comprehensive safety/audit logging into a unified interface.
+A sophisticated remote terminal control system with integrated AI assistance for managing multiple machines via SSH. LXRION Terminal combines manual shell access, AI-powered command suggestions, and comprehensive safety/audit logging into a unified interface.
+
+## Branding and compatibility
+
+**Official product name:** LXRION Terminal. The new primary CLI command is `lxrion`; `hermes` remains an alias for existing installations. Existing internal Python module names (`hermes_terminal`), environment variables (`HERMES_*`), and configuration/SSH paths are intentionally retained in this transitional release to avoid breaking installations. The GitHub repository URL still contains its former name until the repository is renamed in GitHub settings.
 
 ## Features
 
@@ -36,7 +40,7 @@ A sophisticated remote terminal control system with integrated AI assistance for
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/Hermes-Terminal.git
+git clone https://github.com/ChristisKing91/Hermes-Terminal.git
 cd Hermes-Terminal
 
 # Install in development mode
@@ -55,25 +59,25 @@ cp config/hosts.example.yaml ~/.config/hermes-terminal/hosts.yaml
 
 ```bash
 # Start interactive menu
-hermes
+lxrion
 
 # Start in manual shell mode
-hermes manual
+lxrion manual
 
 # Start in AI assistant mode (requires Ollama or OpenAI)
-hermes ai-mode
+lxrion ai-mode
 
 # Start in command builder mode
-hermes build
+lxrion build
 
 # List configured hosts
-hermes hosts-list
+lxrion hosts-list
 
 # Show command history
-hermes history
+lxrion history
 
 # Run diagnostic
-hermes doctor
+lxrion doctor
 ```
 
 ## Architecture
@@ -305,7 +309,7 @@ tests/
 
 ## Security Considerations
 
-### What Hermes Does
+### What LXRION Terminal Does
 ✅ Logs all command execution with full audit trail
 ✅ Classifies commands by risk level
 ✅ Requires explicit approval for dangerous operations
@@ -314,7 +318,7 @@ tests/
 ✅ Enforces confirmation format for critical commands
 ✅ Tracks user, timestamp, and success/failure for each command
 
-### What Hermes Does NOT Do
+### What LXRION Terminal Does NOT Do
 ❌ Prevent users from running approved dangerous commands
 ❌ Protect against SSH compromise or credential theft
 ❌ Enforce network-based access controls
@@ -366,7 +370,7 @@ echo $HERMES_DATABASE_PATH
 
 # Reset database (WARNING: Deletes audit history)
 rm ~/.config/hermes-terminal/hermes.db
-hermes  # Will recreate on startup
+lxrion  # Will recreate on startup
 ```
 
 ## Contributing
@@ -413,7 +417,7 @@ MIT License - see LICENSE file for details
 
 For issues, questions, or suggestions:
 
-1. Check existing [GitHub Issues](https://github.com/yourusername/Hermes-Terminal/issues)
+1. Check existing [GitHub Issues](https://github.com/ChristisKing91/Hermes-Terminal/issues)
 2. Create a new issue with detailed information
 3. Include logs from `~/.local/share/hermes-terminal/logs/`
 
