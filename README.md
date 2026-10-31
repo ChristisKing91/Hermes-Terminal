@@ -37,6 +37,10 @@ as `python -m hermes_terminal.workbench` with `src` on `PYTHONPATH`. The
 This development component has not been promoted into the installed native LXRION
 Core. See the guide for lifecycle, recovery, privacy and verification boundaries.
 
+An optional [coordinator snapshot](docs/COORDINATOR_READ_ONLY_CONTRACT.md) reads
+selected metadata from the existing local AI Development Team with explicit
+opt-in. It creates no task queue, approvals, model calls or memory records.
+
 ### Prerequisites
 - Python 3.11+
 - SSH access to target machines (optional for local gateway)

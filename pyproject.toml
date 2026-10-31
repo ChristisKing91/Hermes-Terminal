@@ -37,6 +37,7 @@ dev = [
 [project.scripts]
 hermes = "hermes_terminal.cli:cli_main"
 hermes-workbench = "hermes_terminal.workbench:main"
+hermes-coordinator-snapshot = "hermes_terminal.coordinator_snapshot:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

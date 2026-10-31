@@ -31,8 +31,10 @@ existing queue over two writable task authorities, and test interruption and sta
 revision rejection before enabling a bridge. No automatic apply bridge is enabled.
 
 The [read-only coordinator contract](COORDINATOR_READ_ONLY_CONTRACT.md) records a
-live GET schema observation, exact field mapping and a minimal view proposal.
-It adds no runtime adapter and keeps the existing task queue authoritative.
+live GET schema observation, exact field mapping and the separate, opt-in snapshot
+module. Its local implementation is pending review, creates no mirrored tasks and
+keeps the existing task queue authoritative. It does not connect this SQLite
+ledger to the coordinator or the installed Core.
 
 Before native adoption, reconcile source authority and adapt this ledger to the
 existing Core's owner/project scope, approvals and storage policy. Review the diff
