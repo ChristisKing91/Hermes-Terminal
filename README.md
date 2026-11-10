@@ -6,6 +6,20 @@ A sophisticated remote terminal control system with integrated AI assistance for
 
 **Official product name:** LXRION Terminal. The new primary CLI command is `lxrion`; `hermes` remains an alias for existing installations. Existing internal Python module names (`hermes_terminal`), environment variables (`HERMES_*`), and configuration/SSH paths are intentionally retained in this transitional release to avoid breaking installations. The GitHub repository URL still contains its former name until the repository is renamed in GitHub settings.
 
+## Optional Agentic AI portal (development preview)
+
+A local-first development console is available on the review branch.
+It reuses the existing Ollama provider and the previously implemented
+read-only AI Development Team snapshot adapter. It **does not** replace
+the established Windows coordinator, persist another knowledge database,
+execute commands, or authorize changes.
+
+Install the optional extra with `pip install -e ".[dev,portal]"`,
+set `LXRION_PORTAL_TOKEN`, and run `lxrion-portal` to open
+`http://127.0.0.1:8765/`. See
+[the agentic stack guide](docs/AGENTIC_STACK_PORTAL.md) for the setup,
+strict local-only restrictions, tests and integration roadmap.
+
 ## Features
 
 ### 🎯 Core Capabilities
