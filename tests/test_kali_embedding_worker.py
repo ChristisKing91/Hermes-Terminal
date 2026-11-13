@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import kali_embedding_worker as worker
+from tools import kali_embedding_worker as worker
 
 
 REVISION = "1" * 40
