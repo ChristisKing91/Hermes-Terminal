@@ -5,8 +5,15 @@ on:
       - "src/hermes_terminal/coordinator_snapshot.py"
       - "src/hermes_terminal/portal.py"
       - "src/hermes_terminal/portal.html"
+      - "src/hermes_terminal/model_capabilities.py"
+      - "src/hermes_terminal/ai/ollama.py"
       - "tests/test_coordinator_snapshot.py"
       - "tests/test_portal.py"
+      - "tests/test_model_routing.py"
+      - "tests/test_local_inference.py"
+      - "tests/test_kali_embedding_worker.py"
+      - "tools/kali_embedding_worker.py"
+      - "src/hermes_terminal/local_inference.py"
       - "pyproject.toml"
       - ".github/workflows/agentic-portal.yml"
   push:
@@ -28,6 +35,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,portal]"
       - name: Compile Python modules
-        run: python -m compileall -q src/hermes_terminal/portal.py src/hermes_terminal/coordinator_snapshot.py
+        run: python -m compileall -q src/hermes_terminal/portal.py src/hermes_terminal/coordinator_snapshot.py src/hermes_terminal/model_capabilities.py
       - name: Run synthetic adapter and portal tests
-        run: python -m pytest -q tests/test_coordinator_snapshot.py tests/test_portal.py
+        run: python -m pytest -q tests/test_coordinator_snapshot.py tests/test_portal.py tests/test_model_routing.py tests/test_local_inference.py tests/test_kali_embedding_worker.py
