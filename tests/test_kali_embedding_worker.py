@@ -115,9 +115,14 @@ class WorkerTests(unittest.TestCase):
         class Output:
             buffer = BytesIO()
 
+        class Input:
+            def fileno(self):
+                return 0
+
         expected = worker.response_base("discover", REVISION, capabilities=[])
         with (
             patch.dict(worker.os.environ, {"SSH_ORIGINAL_COMMAND": ""}),
+            patch.object(worker.sys, "stdin", Input()),
             patch.object(worker.os, "umask"),
             patch.object(worker.sys, "stdout", Output()),
             patch.object(worker, "read_request", return_value={"version": 1, "operation": "discover"}),
