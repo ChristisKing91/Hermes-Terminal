@@ -111,3 +111,19 @@ The existing coordinator adapter and synthetic tests on this branch were
 carried from the separate prior audit branch, not rewritten. Existing
 `feature/lxrion-agent-workbench-20261022` and PR #1 histories are untouched.
 This branch is intentionally a reviewable addition based on `main`.
+
+## Explicit local model routing
+
+The existing chat request `{"prompt":"..."}` uses the configured model.
+Add `"purpose":"chat"`, `"purpose":"coding"`, or `"purpose":"reasoning"`
+to select a model from the capability registry. Routing checks the exact
+installed tag and follows a fixed preference order. The route returns a
+structured 503 when no eligible model is available. Provider failures are
+returned to the caller without retrying inference on another model.
+
+Authenticated GET `/api/model-capabilities` lists policy capabilities and
+current installation status. Authenticated POST `/api/embeddings` accepts
+`{"text":"search_query: ..."}` and returns the local Nomic model tag,
+dimensions and vector. Clients supply the appropriate query or document
+prefix. The embedding endpoint creates no index and stores no inputs.
+Only one chat or embedding request runs at a time in the portal process.

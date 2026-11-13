@@ -19,15 +19,18 @@ class AITimeoutError(RuntimeError):
 class OllamaProvider(AIProvider):
     """Ollama local AI provider"""
 
-    def __init__(self, base_url: str, model: str, timeout: float = 300.0):
+    def __init__(
+        self, base_url: str, model: str, timeout: float = 300.0, *, trust_env: bool = True
+    ):
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.timeout = timeout
+        self.trust_env = trust_env
 
     def is_available(self) -> bool:
         """Check if Ollama is running and model is available"""
         try:
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=5.0, trust_env=self.trust_env) as client:
                 response = client.get(f"{self.base_url}/api/tags")
                 if response.status_code == 200:
                     models = response.json().get("models", [])
@@ -47,7 +50,7 @@ class OllamaProvider(AIProvider):
             messages.append({"role": "user", "content": prompt})
 
             timeout = httpx.Timeout(self.timeout, connect=10.0)
-            with httpx.Client(timeout=timeout) as client:
+            with httpx.Client(timeout=timeout, trust_env=self.trust_env) as client:
                 response = client.post(
                     f"{self.base_url}/api/chat",
                     json={
@@ -66,10 +69,32 @@ class OllamaProvider(AIProvider):
             logger.error(f"Ollama generation failed: {e}")
             return ""
 
+    def embed(self, text: str) -> list[float]:
+        """Generate one vector with the selected model without truncating the input."""
+        try:
+            timeout = httpx.Timeout(self.timeout, connect=10.0)
+            with httpx.Client(timeout=timeout, trust_env=self.trust_env) as client:
+                response = client.post(
+                    f"{self.base_url}/api/embed",
+                    json={"model": self.model, "input": text, "truncate": False},
+                )
+                response.raise_for_status()
+                data = response.json()
+                if not isinstance(data, dict) or data.get("model") != self.model:
+                    return []
+                vectors = data.get("embeddings")
+                if isinstance(vectors, list) and len(vectors) == 1 and isinstance(vectors[0], list):
+                    return vectors[0]
+        except httpx.TimeoutException as error:
+            raise AITimeoutError(AI_TIMEOUT_MESSAGE) from error
+        except (httpx.HTTPError, ValueError):
+            logger.warning("Ollama embedding request failed")
+        return []
+
     def list_models(self) -> list[str]:
         """List available Ollama models"""
         try:
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=5.0, trust_env=self.trust_env) as client:
                 response = client.get(f"{self.base_url}/api/tags")
                 if response.status_code == 200:
                     models = response.json().get("models", [])
