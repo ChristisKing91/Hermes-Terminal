@@ -10,6 +10,7 @@ import logging
 import os
 import time
 from collections import Counter
+from collections.abc import Callable
 from importlib.resources import files
 from threading import Lock
 from typing import Literal
@@ -20,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from .ai.ollama import AITimeoutError, OllamaProvider
 from .coordinator_snapshot import TRUSTED_BASE, read_snapshot
+from .local_inference import MAX_AUDIO_BYTES, transcribe, translate, valid_audio
 from .model_capabilities import Capability, MODELS, select_model
 
 LOGGER = logging.getLogger("lxrion.portal")
@@ -43,6 +45,17 @@ class ChatRequest(BaseModel):
 
 class EmbedRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2400)
+
+
+class SpeechRequest(BaseModel):
+    audio: str = Field(min_length=1, max_length=4 * ((MAX_AUDIO_BYTES + 2) // 3))
+    language: Literal["en", "es"] = "en"
+
+
+class TranslationRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=400)
+    source: Literal["eng", "spa"]
+    target: Literal["eng", "spa"]
 
 
 def _require_token(authorization: str | None) -> None:
@@ -129,7 +142,7 @@ def model_capabilities(authorization: str | None = Header(default=None)) -> dict
              "declaredCapabilities": [capability.value for capability in model.capabilities]}
             for model in MODELS
         ],
-        "routableCapabilities": ["chat", "coding", "reasoning", "embedding"],
+        "routableCapabilities": ["chat", "coding", "reasoning", "embedding", "speech", "translation"],
     }
 
 
@@ -156,6 +169,44 @@ def embeddings(request: EmbedRequest, authorization: str | None = Header(default
         INFERENCE_LOCK.release()
     _measure("embedding", started, "ok")
     return {"model": provider.model, "dimensions": len(values), "embedding": values}
+
+
+def _run_local_inference(
+    capability: str, operation: Callable[[], tuple[str, str | None]]
+) -> dict:
+    started = time.monotonic()
+    if not INFERENCE_LOCK.acquire(blocking=False):
+        raise HTTPException(status_code=429, detail={"code": "inference_busy"})
+    try:
+        model, text = operation()
+    except AITimeoutError as error:
+        _measure(capability, started, "timeout")
+        raise HTTPException(status_code=504, detail="Local model timed out") from error
+    finally:
+        INFERENCE_LOCK.release()
+    if text is None:
+        _measure(capability, started, "unavailable")
+        raise HTTPException(status_code=503, detail={"code": "model_unavailable", "capability": capability})
+    _measure(capability, started, "ok")
+    return {"model": model, "text": text}
+
+
+@app.post("/api/transcription")
+def transcription(request: SpeechRequest, authorization: str | None = Header(default=None)) -> dict:
+    _require_token(authorization)
+    if not valid_audio(request.audio):
+        raise HTTPException(status_code=422, detail="Expected up to 20 seconds of mono 16 kHz PCM WAV")
+    return _run_local_inference("speech", lambda: transcribe(request.audio, request.language))
+
+
+@app.post("/api/translation")
+def translation(request: TranslationRequest, authorization: str | None = Header(default=None)) -> dict:
+    _require_token(authorization)
+    if request.source == request.target:
+        raise HTTPException(status_code=422, detail="Source and target languages must differ")
+    return _run_local_inference(
+        "translation", lambda: translate(request.text, request.source, request.target)
+    )
 
 
 @app.post("/api/coordinator/snapshot")

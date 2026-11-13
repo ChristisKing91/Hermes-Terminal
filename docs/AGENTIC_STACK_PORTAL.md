@@ -127,3 +127,14 @@ current installation status. Authenticated POST `/api/embeddings` accepts
 dimensions and vector. Clients supply the appropriate query or document
 prefix. The embedding endpoint creates no index and stores no inputs.
 Only one chat or embedding request runs at a time in the portal process.
+
+## Kali speech and translation
+
+Authenticated POST `/api/transcription` accepts a base64-encoded mono 16 kHz
+16-bit PCM WAV (up to 20 seconds) in `audio` and language `en` or `es`.
+Authenticated POST `/api/translation` accepts `text`, `source` and `target`,
+with different language codes `eng` and `spa`. Both use the existing local
+model environments in `~/LXRION/model-assets` (or an operator-set
+`LXRION_MODEL_ASSETS`). The service processes one inference at a time.
+SeamlessM4T v2 Large is distributed under CC BY-NC 4.0. The endpoint is for
+local noncommercial evaluation.
