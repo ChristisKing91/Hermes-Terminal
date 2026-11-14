@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from .ai.ollama import AITimeoutError, OllamaProvider
 from .coordinator_snapshot import TRUSTED_BASE, read_snapshot
+from .owner_memory_api import create_memory_router
 
 LOGGER = logging.getLogger("lxrion.portal")
 COUNTS: Counter[str] = Counter()
@@ -74,6 +75,10 @@ app = FastAPI(
 )
 
 
+# Keep memory opt-in, token-protected and separate from chat inference.
+app.include_router(create_memory_router(_require_token))
+
+
 @app.get("/", response_class=HTMLResponse)
 def homepage() -> HTMLResponse:
     html = files("hermes_terminal").joinpath("portal.html").read_text(encoding="utf-8")
@@ -89,7 +94,7 @@ def health() -> dict:
         "canExecute": False,
         "canApprove": False,
         "canApply": False,
-        "persistentKnowledgeStore": False,
+        "persistentKnowledgeStore": os.environ.get("LXRION_OWNER_MEMORY_ENABLED") == "1" and bool(os.environ.get("LXRION_OWNER_MEMORY_DB")),
     }
 
 
