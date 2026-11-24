@@ -427,3 +427,7 @@ For issues, questions, or suggestions:
 
 **Last Updated**: July 2026
 **Version**: 0.1.0 (Beta)
+
+## Optional native Windows console executable
+
+On Windows, activate a dedicated Python 3.11+ environment, run `python -m pip install -e .` and install a reviewed Windows-compatible PyInstaller version, then run `BUILD_WINDOWS.cmd`. The script packages the existing CLI into `dist/LXRION-Terminal.exe` with `assets/branding/app.ico` embedded. It does not install dependencies or change SSH, AI, command safety, or audit settings. This new build recipe requires a Windows build and smoke test (`LXRION-Terminal.exe --help`) before claiming a verified release. It is not a PWA or browser wrapper.
