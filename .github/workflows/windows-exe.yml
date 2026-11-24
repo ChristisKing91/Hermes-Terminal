@@ -1,0 +1,41 @@
+name: Native Windows EXE
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'packaging/**'
+      - 'assets/branding/app.ico'
+      - 'BUILD_WINDOWS.cmd'
+      - 'pyproject.toml'
+      - '.github/workflows/windows-exe.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install build dependencies
+        run: python -m pip install -e . "PyInstaller==6.11.1"
+      - name: Build native console executable
+        shell: cmd
+        run: BUILD_WINDOWS.cmd
+      - name: Verify executable help and embedded icon
+        shell: pwsh
+        run: |
+          & .\dist\LXRION-Terminal.exe --help
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python packaging/verify_windows_icon.py dist/LXRION-Terminal.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LXRION-Terminal-windows-x64
+          path: dist/LXRION-Terminal.exe
+          if-no-files-found: error
+          retention-days: 14
