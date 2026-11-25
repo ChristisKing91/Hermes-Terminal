@@ -1,6 +1,8 @@
 # LXRION Terminal
 
-![Project branding](assets/branding/banner.svg)
+![Project branding](assets/branding/portfolio-cover.jpeg)
+
+*Illustrative concept artwork. Command syntax, test counts, deployment messages and interface details are examples, not verified execution results.*
 
 A sophisticated remote terminal control system with integrated AI assistance for managing multiple machines via SSH. LXRION Terminal combines manual shell access, AI-powered command suggestions, and comprehensive safety/audit logging into a unified interface.
 
