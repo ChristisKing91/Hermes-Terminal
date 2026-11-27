@@ -134,3 +134,9 @@ dmypy.json
 .local/share/hermes-terminal/
 hermes.db
 *.db-journal
+
+# Workbench runtime state belongs outside source
+tasks.sqlite3*
+agent_state.json
+task_board.json
+workbench_snapshot.json
