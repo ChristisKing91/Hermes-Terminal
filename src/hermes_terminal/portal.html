@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>LXRION • Agentic Stack</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#e9f1ff;background:#071120}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0%,#123451 0%,#071120 47%);line-height:1.5}
+    .shell{max-width:1340px;margin:0 auto;padding:26px 22px 64px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #27415c;padding-bottom:22px}
+    .brand{font-size:24px;letter-spacing:.18em;font-weight:850;color:#f0f7ff}.brand span{color:#24d5c0}
+    .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8aafca}
+    .chip{border:1px solid #397267;border-radius:30px;padding:7px 12px;color:#95e7d7;font-size:12px}
+    h1{font-size:clamp(28px,4vw,49px);line-height:1.1;max-width:800px;margin:34px 0 12px}
+    p{color:#a9bed1}.hero p{max-width:790px;margin-bottom:30px}
+    .layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:18px}
+    .panel{background:rgba(11,27,44,.92);border:1px solid #28445f;border-radius:16px;padding:22px;box-shadow:0 18px 42px #0002}
+    .panel h2{font-size:19px;margin:0 0 9px}.panel h3{font-size:15px;margin:22px 0 10px}
+    .sub{font-size:13px;color:#88a9c2;margin:0 0 18px}
+    .stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .layer{border:1px solid #2b4660;background:#10263b;border-radius:10px;padding:12px 13px}
+    .layer strong{display:block;font-size:13px;margin-bottom:4px}
+    .layer small{color:#9cb3c9;display:block;font-size:11px}
+    .state{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#91ecc9}
+    .future{color:#e9c58c}
+    .formrow{display:flex;gap:8px;align-items:center;margin:12px 0}
+    input,textarea{width:100%;min-width:0;color:#e6f1ff;background:#071726;border:1px solid #3d5a73;border-radius:9px;padding:12px;font:inherit;font-size:14px}
+    textarea{resize:vertical;min-height:115px}input:focus,textarea:focus{outline:2px solid #37cbb7;outline-offset:1px}
+    button{background:#20baac;color:#042326;border:0;border-radius:9px;padding:11px 14px;font-weight:750;white-space:nowrap;cursor:pointer}
+    button:hover{background:#48dccb}button:disabled{opacity:.55;cursor:wait}
+    .alt{background:#18374e;color:#d0f8f5;border:1px solid #39748b}.alt:hover{background:#24506a}
+    .result{background:#071726;border:1px solid #294765;border-radius:10px;min-height:66px;padding:14px;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;color:#c6dcf0}
+    .warn{border-left:3px solid #dda86b;padding:10px 14px;background:#2b251d;color:#e9d8bb;font-size:12px;border-radius:5px}
+    .task{border-bottom:1px solid #25435a;padding:10px 0;font-size:13px}
+    .task:last-child{border:none}.task b{display:block}.task span{color:#a8bfd1}
+    .footer{margin-top:20px;color:#829eb5;font-size:12px}
+    .split{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .tiny{font-size:11px;color:#91a9bd}
+    @media(max-width:880px){.layout{grid-template-columns:1fr}.top{align-items:flex-start}.stack{grid-template-columns:1fr 1fr}}
+    @media(max-width:500px){.shell{padding:16px 13px}.stack{grid-template-columns:1fr}.formrow{flex-wrap:wrap}.formrow button{width:100%}.brand{font-size:19px}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <div><div class="brand">LXR<span>ION</span></div><div class="eyebrow">Agentic AI / development console</div></div>
+    <div class="chip">LOCAL-FIRST • READ-ONLY TASKS</div>
+  </header>
+  <section class="hero">
+    <h1>One console. Your existing AI team.</h1>
+    <p>A secure development view for local model interaction and selected metadata from your existing AI Development Team. This portal does not start another scheduler, approve code, execute commands, or copy private task contents.</p>
+  </section>
+  <div class="layout">
+    <section>
+      <div class="panel">
+        <h2>System architecture</h2>
+        <p class="sub">Real capabilities are distinguished from future integration work.</p>
+        <div class="stack">
+          <div class="layer"><strong>01 · Frontend</strong><small>Responsive local web console</small><span class="state">Implemented</span></div>
+          <div class="layer"><strong>02 · Document ingestion</strong><small>Existing Core / team authority remains separate</small><span class="state future">Integration pending</span></div>
+          <div class="layer"><strong>03 · Chunking / preprocessing</strong><small>Reuse established retrieval implementation</small><span class="state future">Integration pending</span></div>
+          <div class="layer"><strong>04 · Embeddings</strong><small>Approved local model routing planned</small><span class="state future">Integration pending</span></div>
+          <div class="layer"><strong>05 · Vector store</strong><small>No second persistent knowledge database</small><span class="state future">Integration pending</span></div>
+          <div class="layer"><strong>06 · Retrieval</strong><small>Existing project-scoped retrieval is authority</small><span class="state future">Integration pending</span></div>
+          <div class="layer"><strong>07 · Prompt policy</strong><small>Non-executing development assistance</small><span class="state">Implemented</span></div>
+          <div class="layer"><strong>08 · LLM</strong><small>Existing local Ollama provider</small><span class="state">Implemented</span></div>
+          <div class="layer"><strong>09 · Infrastructure</strong><small>Explicit loopback-only service</small><span class="state">Development ready</span></div>
+          <div class="layer"><strong>10 · Evaluation</strong><small>Operation counts, CI and audited snapshots</small><span class="state">Initial coverage</span></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Local AI assistant</h2>
+        <p class="sub">Uses the terminal's Ollama provider. Suggestions only; zero tool or command execution.</p>
+        <label for="question" class="eyebrow">Question</label>
+        <textarea id="question" maxlength="6000" placeholder="Ask about LXRION architecture, source structure, or a development problem..."></textarea>
+        <div class="formrow"><button id="ask">Ask local model</button><button id="models" class="alt">Check installed models</button></div>
+        <div id="chat-result" class="result" aria-live="polite">No prompt sent.</div>
+        <h3>Model availability</h3>
+        <div id="model-result" class="result">Not checked.</div>
+      </div>
+    </section>
+    <aside>
+      <div class="panel">
+        <h2>Local access</h2>
+        <p class="sub">Enter the token configured in LXRION_PORTAL_TOKEN. It stays in this browser tab's memory and is never saved by the portal.</p>
+        <label for="token" class="eyebrow">Session token</label>
+        <div class="formrow"><input id="token" type="password" autocomplete="off" placeholder="Portal token"></div>
+        <div class="warn">Run this service only on 127.0.0.1. Do not publish it through a reverse proxy, tunnel, or public domain.</div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Development Team snapshot</h2>
+        <p class="sub">One bounded, read-only request to the existing coordinator at 127.0.0.1:4318. Reports statuses only; it cannot approve or apply anything.</p>
+        <button id="snapshot">Observe coordinator once</button>
+        <div id="coord-result" class="result" style="margin-top:12px" aria-live="polite">Not observed. No background polling.</div>
+        <div id="task-list"></div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Observability</h2>
+        <p class="sub">Process-only operation counters. No prompts, credentials or task content are stored.</p>
+        <button id="telemetry" class="alt">Show telemetry</button>
+        <div id="telemetry-result" class="result" style="margin-top:12px">Not checked.</div>
+      </div>
+    </aside>
+  </div>
+  <footer class="footer">LXRION development portal • Never treat a coordinator status as independent proof of approval, release or deployment.</footer>
+</main>
+<script>
+(function () {
+  "use strict";
+  const el = id => document.getElementById(id);
+  const auth = () => ({ "Authorization": "Bearer " + el("token").value.trim() });
+  async function call(path, method, body) {
+    const headers = Object.assign({ "Content-Type": "application/json" }, auth());
+    const response = await fetch(path, { method: method || "GET", headers, body: body ? JSON.stringify(body) : undefined, cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok) throw Error(data.detail || "HTTP " + response.status);
+    return data;
+  }
+  async function run(button, target, work) {
+    const b = el(button), output = el(target);
+    b.disabled = true; output.textContent = "Checking...";
+    try { await work(output); }
+    catch (err) { output.textContent = "Unavailable: " + err.message; }
+    finally { b.disabled = false; }
+  }
+  el("ask").addEventListener("click", () => run("ask", "chat-result", async output => {
+    const question = el("question").value.trim();
+    if (!question) { output.textContent = "Enter a question first."; return; }
+    const value = await call("/api/chat", "POST", { prompt: question });
+    output.textContent = value.answer + "\n\nModel: " + value.model + " · Executed actions: 0";
+  }));
+  el("models").addEventListener("click", () => run("models", "model-result", async output => {
+    const data = await call("/api/models");
+    output.textContent = "Configured: " + data.configuredModel + "\nInstalled: " + (data.availableModels.join(", ") || "No model response");
+  }));
+  el("snapshot").addEventListener("click", () => run("snapshot", "coord-result", async output => {
+    el("task-list").replaceChildren();
+    const data = await call("/api/coordinator/snapshot", "POST");
+    if (data.freshness !== "observed") { output.textContent = "Coordinator unavailable: " + (data.reason || "not observed"); return; }
+    output.textContent = "Observed at " + data.observedAt + "\nTasks: " + data.tasks.length + "\nAuthority: " + data.authority + "\nNo execution or approval capability.";
+    data.tasks.slice(0, 15).forEach(task => {
+      const node = document.createElement("div"); node.className = "task";
+      const name = document.createElement("b");
+      name.textContent = task.taskRef.projectId + " / " + task.taskRef.taskId;
+      const state = document.createElement("span"); state.textContent = "Reported status: " + task.coordinatorStatus;
+      node.append(name, state); el("task-list").append(node);
+    });
+  }));
+  el("telemetry").addEventListener("click", () => run("telemetry", "telemetry-result", async output => {
+    const data = await call("/api/telemetry");
+    output.textContent = JSON.stringify(data, null, 2);
+  }));
+})();
+</script>
+</body></html>
